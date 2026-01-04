@@ -2,6 +2,7 @@ import { useState, createContext, useContext, useCallback, useEffect } from "rea
 import { authAPI } from '../../services/api'
 
 export const AuthContext = createContext();
+console.log("what createCOntext returns = ",AuthContext)
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -22,12 +23,17 @@ export const AuthProvider = ({ children }) => {
       try {
         // Verify token with backend
         const response = await authAPI.verifyToken();
-                    // ✅ Handle response format from backend
-                    if (response.data && response.data.user) {
-                      setUser(response.data.user);
-                      console.log('Session restored:', response.data.user.email);
-                  }
-     
+        // ✅ Handle response format from backend
+        if (response?.data?.user ) {
+          setUser(response.data.user);
+          console.log('Session restored:', response.data.user, response.data.user.email);
+        } else {
+          // ⚠️ Token exists but no user data returned
+          console.warn('Token verification succeeded but no user data');
+          localStorage.removeItem('authToken');
+          setUser(null);
+        }
+
       } catch (err) {
         console.error('Token verification failed:', err);
         // Token invalid/expired - clean up
@@ -64,6 +70,7 @@ export const AuthProvider = ({ children }) => {
       if (response.data.token) {
         localStorage.setItem('authToken', response.data.token)
       }
+      console.log("inside login response = ",response.data.user)
       setUser(response.data.user);
       return response.data;
     } catch (err) {
@@ -82,7 +89,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('authToken');
       setUser(null);
       setError(null);
-  }
+    }
   }, []);
 
   const value = {
@@ -94,7 +101,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     setError,
     isLoggedIn: !!user,
-    setIsLoggedIn
+ 
   };
 
   return (

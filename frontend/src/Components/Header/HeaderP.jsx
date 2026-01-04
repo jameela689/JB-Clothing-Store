@@ -1,19 +1,20 @@
-import React, { useState, useEffect,useContext } from 'react';
-import { AuthContext} from '../AuthContext/AuthContext';
-import { Link, useNavigate,useSearchParams } from 'react-router-dom'
+import React, { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '../AuthContext/AuthContext';
+import { useWishlist } from '../WishlistContext/WishlistContext';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import './HeaderP.css';
 
 // ==================== HEADER COMPONENT ====================
 export const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [searchText, setSearchText] = useState(searchParams.get('search') || '')
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const navigate = useNavigate();
-  const [searchParams]  = useSearchParams();
-  const [searchText,setSearchText] = useState(searchParams.get('search') || '')
-  const {isLoggedIn,logout,setIsLoggedIn,loading} = useContext(AuthContext);
-  if (loading) {
-    return null; // Or a skeleton header
-}
+  
+  const { isLoggedIn, logout, loading } = useContext(AuthContext);
+  const { wishlistCount } = useWishlist();
+
 
   // Add scroll effect to header
   useEffect(() => {
@@ -24,54 +25,58 @@ export const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleCategoryClick = (e, category) => {
-    e.preventDefault(); // Prevent default anchor behavior
-    navigate(`/landingpage?category=${category}`); // Navigate with query param
-  };
-
-  const handleSearchSubmit = (e)=>{
-    if(e.key==='Enter'){
-      e.preventDefault();
-      const trimmedSearch = searchText.trim();
-      if(trimmedSearch){
-        const currentCategory = searchParams.get('category')
-        const params = new URLSearchParams();
-        params.set('search',trimmedSearch);
-        if(currentCategory){
-          params.set('category',currentCategory)
-        }
-        navigate(`/landingpage?${params.toString()}`);
-        
-      }
-      else{
-        const currentCategory = searchParams.get('category');
-        if(currentCategory){
-          navigate(`/landingpage?category=${currentCategory}`)
-        }else{
-          navigate('/landingpage');
-        }
-      }
-    }
-  
-  }
-
   useEffect(() => {
     const urlSearch = searchParams.get('search') || '';
     setSearchText(urlSearch);
   }, [searchParams]);
 
-    // Logout handler
-    const handleLogout = async() => {
-      try{
-        await logout();
-        // setIsLoggedIn(false)
-        setShowProfileDropdown(false);
-        navigate('/landingpage'); // Redirect to home
-      }catch(error){
-        console.log("Logout error",error)
-      }
+  const handleCategoryClick = (e, category) => {
+    e.preventDefault(); // Prevent default anchor behavior
+    navigate(`/landingpage?category=${category}`); // Navigate with query param
+  };
 
-    };
+  const handleSearchSubmit = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const trimmedSearch = searchText.trim();
+      if (trimmedSearch) {
+        const currentCategory = searchParams.get('category')
+        const params = new URLSearchParams();
+        params.set('search', trimmedSearch);
+        if (currentCategory) {
+          params.set('category', currentCategory)
+        }
+        navigate(`/landingpage?${params.toString()}`);
+
+      }
+      else {
+        const currentCategory = searchParams.get('category');
+        if (currentCategory) {
+          navigate(`/landingpage?category=${currentCategory}`)
+        } else {
+          navigate('/landingpage');
+        }
+      }
+    }
+
+  }
+
+
+
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setShowProfileDropdown(false);
+      navigate('/landingpage'); // Redirect to home
+    } catch (error) {
+      console.log("Logout error", error)
+    }
+
+  };
+  if (loading) {
+    return null; // Or a skeleton header
+  }
 
   return (
     <header className={`header ${isScrolled ? 'header-scrolled' : ''}`}>
@@ -79,35 +84,35 @@ export const Header = () => {
         {/* Logo */}
         <div className="logo">
           <a href="/landingpage" >
-          <h1>JB</h1>
+            <h1>JB</h1>
           </a>
         </div>
 
         {/* Navigation Links */}
         <nav className="nav-links">
-          <a 
-            href="/landingpage?category=men" 
+          <a
+            href="/landingpage?category=men"
             className="nav-link"
             onClick={(e) => handleCategoryClick(e, 'men')}
           >
             Men
           </a>
-          <a 
-            href="/landingpage?category=women" 
+          <a
+            href="/landingpage?category=women"
             className="nav-link"
             onClick={(e) => handleCategoryClick(e, 'women')}
           >
             Women
           </a>
-          <a 
-            href="/landingpage?category=Unisex" 
+          <a
+            href="/landingpage?category=Unisex"
             className="nav-link"
             onClick={(e) => handleCategoryClick(e, 'Unisex')}
           >
             Unisex
           </a>
-          <a 
-            href="/landingpage?category=Girls" 
+          <a
+            href="/landingpage?category=Girls"
             className="nav-link"
             onClick={(e) => handleCategoryClick(e, 'Girls')}
           >
@@ -137,11 +142,11 @@ export const Header = () => {
           </Link>
         </div> */}
 
-{isLoggedIn ? (
+        {isLoggedIn ? (
           /* LOGGED IN STATE */
           <div className="user-actions">
             {/* Profile Dropdown */}
-            <div 
+            <div
               className="profile-wrapper"
               onMouseEnter={() => setShowProfileDropdown(true)}
               onMouseLeave={() => setShowProfileDropdown(false)}
@@ -173,10 +178,22 @@ export const Header = () => {
             </div>
 
             {/* Wishlist */}
-            <button className="action-button" onClick={() => navigate('/wishlist')}>
+            {/* <button className="action-button" onClick={() => navigate('/wishlist')}>
               <svg className="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
+              <span className="action-label">Wishlist</span>
+            </button> */}
+            {/* Wishlist with Count Badge */}
+            <button className="action-button wishlist-btn-header" onClick={() => navigate('/wishlist')}>
+              <div className="icon-wrapper">
+                <svg className="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                {wishlistCount > 0 && (
+                  <span className="badge">{wishlistCount > 99 ? '99+' : wishlistCount}</span>
+                )}
+              </div>
               <span className="action-label">Wishlist</span>
             </button>
 
@@ -192,7 +209,7 @@ export const Header = () => {
           /* LOGGED OUT STATE */
           <div className="user-actions">
             {/* Profile with Login/Signup */}
-            <div 
+            <div
               className="profile-container"
               onMouseEnter={() => setShowProfileDropdown(true)}
               onMouseLeave={() => setShowProfileDropdown(false)}

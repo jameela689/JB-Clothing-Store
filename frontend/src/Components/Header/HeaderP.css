@@ -377,3 +377,55 @@
     display: none;
   }
 }
+
+/* Add these styles to your existing HeaderP.css */
+
+/* Wishlist button with badge container */
+.wishlist-btn-header {
+  position: relative;
+}
+
+.icon-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Badge styling */
+.badge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: #ff3e6c;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 10px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation: badge-pop 0.3s ease;
+}
+
+/* Badge animation on count change */
+@keyframes badge-pop {
+  0% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Hover effect for wishlist button */
+.wishlist-btn-header:hover .badge {
+  background: #d63553;
+  transform: scale(1.1);
+  transition: all 0.2s ease;
+}

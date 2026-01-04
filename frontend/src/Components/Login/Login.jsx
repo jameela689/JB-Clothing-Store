@@ -10,7 +10,7 @@ const Login = () => {
     const [errors,setErrors] = useState({email:"",password:""});
     const [loading, setLoading] = useState(false);
     const {login,error,setError} = useContext(AuthContext);
-    const {setIsLoggedIn} = useAuth();
+
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
@@ -86,12 +86,12 @@ const Login = () => {
             
             try {
                 await login(formData.email, formData.password);
-                setIsLoggedIn(true);
+                console.log('Login successful, redirecting...');
                 const redirect = searchParams.get('redirect');
                 navigate(redirect || '/landingpage');
               } catch (err) {
                 console.error('Login error:', err);
-                // setIsLoggedIn(false);
+ 
               } finally {
                 setLoading(false);
               }
